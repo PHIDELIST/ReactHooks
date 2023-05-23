@@ -4,19 +4,22 @@ import './App.css';
 const App = () => {
   const [country, setCountry] = useState('');
   const [universities, setUniversities] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    fetch(`http://universities.hipolabs.com/search?country=${country}`)
-      .then(response => response.json())
-      .then(data => {
-        setUniversities(data);
-        setIsLoading(false);
-      })
-      .catch(error => {
-        console.error(error);
-        setIsLoading(false);
-      });
+    if (country) {
+      setIsLoading(true);
+      fetch(`https://universitiesapi.onrender.com/v1/api/universities/${country}`)
+        .then(response => response.json())
+        .then(data => {
+          setUniversities(data);
+          setIsLoading(false);
+        })
+        .catch(error => {
+          console.error(error);
+          setIsLoading(false);
+        });
+    }
   }, [country]);
 
   const handleSearch = () => {
@@ -30,7 +33,7 @@ const App = () => {
       <button onClick={handleSearch}>Search</button>
 
       {isLoading ? (
-        <p>Loading...Please Wait</p>
+        <p>Loading... Please wait</p>
       ) : universities.length ? (
         <div id='universityArea'>
           {universities.map(university => (
