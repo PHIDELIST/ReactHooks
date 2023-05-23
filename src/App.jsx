@@ -1,56 +1,71 @@
-import React, { useState, useEffect } from 'react';
-import './App.css';
+import { useState, useEffect } from 'react'
+import './App.css'
 
-const App = () => {
+function App() {
   const [country, setCountry] = useState('');
   const [universities, setUniversities] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (country) {
-      setIsLoading(true);
+      setLoading(true);
       fetch(`https://universitiesapi.onrender.com/v1/api/universities/${country}`)
         .then(response => response.json())
         .then(data => {
           setUniversities(data);
-          setIsLoading(false);
+          setLoading(false);
         })
         .catch(error => {
-          console.error(error);
-          setIsLoading(false);
+          console.log('Error in fetching Universities:', error);
+          setLoading(false);
         });
     }
   }, [country]);
 
-  const handleSearch = () => {
-    setIsLoading(true);
+  const handleSearch = event => {
+    event.preventDefault();
+    setCountry(event.target.value);
+    loading(true);
+  };
+
+  const handleClear = () => {
+    setCountry('');
+    setUniversities([]);
   };
 
   return (
     <div id='poolmain'>
-      <h1>Your Trusted University Pool</h1>
-      <input type="text" value={country} onChange={e => setCountry(e.target.value)} placeholder="Enter a country name" />
-      <button onClick={handleSearch}>Search</button>
+      <h2>Universities Pool</h2>
+      <form onClick={handleSearch}>
+        <input type="text" value={country} onChange={handleSearch} placeholder='Enter a country' />
+        <button type="submit">Search</button>
+        <button onClick={handleClear} className='clear'>Clear</button>
+      </form>
 
-      {isLoading ? (
-        <p>Loading... Please wait</p>
-      ) : universities.length ? (
-        <div id='universityArea'>
-          {universities.map(university => (
-            <div id='university-container' key={university.name}>
-              <h3>{university.name}</h3>
-              <p>Country: {university.country}</p>
-              <p>Country Code: {university.alpha_two_code}</p>
-              <p>Website: <a href={university.web_pages[0]}>{university.web_pages[0]}</a></p>
-              <p>Domain: <a href={university.domains[0]}>{university.domains[0]}</a></p>
-            </div>
-          ))}
-        </div>
+      { loading ? (
+        <div className='loading'>Please wait...</div>
       ) : (
-        <p>No universities found.</p>
+        <div>
+          {universities.length > 0 ? (
+            <ul>
+              {universities.map((university, index) => (
+                <div id='university-container'>
+                <li key={index}>
+                  <strong>Name:</strong> {university.name} <br />
+                  <strong>Country:</strong> {university.country} <br />
+                  <strong>Country code:</strong> {university.alpha_two_code} <br />
+                  <strong>Website:</strong> <a href={university.web_pages[0]}>{university.web_pages[0]}</a>
+                </li>
+                </div>
+              ))}
+            </ul>
+          ) : (
+            <div className='no-result'>No results found</div>
+          )}
+        </div>
       )}
     </div>
   );
-};
+}
 
-export default App;
+export default App
